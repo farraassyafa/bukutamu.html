@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buku Tamu</title>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://png.pngtree.com/background/20230401/original/pngtree-wedding-romantic-pink-background-picture-image_2249455.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .content {
+      max-width: 800px;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.5);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #signature-canvas {
+      border: 1px solid #ccc;
+      cursor: crosshair;
+      max-width: 100%;
+      height: auto;
+    }
+
+    button[type="submit"] {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      color: #555;
+    }
+
+    td img {
+      max-width: 100px;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="content">
+    <marquee><h1>Buku Tamu Farraas</h1></marquee>
+    <form id="guestbook-form">
+      <div class="form-group">
+        <label for="name">Nama:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="address">Alamat:</label>
+        <input type="text" id="address" name="address" required>
+      </div>
+      <div class="form-group">
+        <label for="signature">Tanda Tangan:</label>
+        <canvas id="signature-canvas" width="400" height="200"></canvas>
+      </div>
+      <button type="submit">Simpan</button>
+    </form>
+
+    <h2>Tamu Hari Ini</h2>
+    <table id="guest-table">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Alamat</th>
+          <th>Tanda Tangan</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('signature-canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (isDrawing) {
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+
+    canvas.addEventListener('mouseout', () => {
+      isDrawing = false;
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isDrawing = true;
+      [lastX, lastY] = [e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop];
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (isDrawing) {
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop);
+        ctx.stroke();
+        [lastX, lastY] = [e.touches[0].clientX - canvas.offsetLeft, e.touches[0].clientY - canvas.offsetTop];
+      }
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      isDrawing = false;
+    });
+
+    const form = document.getElementById('guestbook-form');
+    const guestTable = document.getElementById('guest-table');
+    const guestTableBody = guestTable.getElementsByTagName('tbody')[0];
+
+    function addGuestToTable(name, address, signatureData) {
+      const row = document.createElement('tr');
+
+      const nameCell = document.createElement('td');
+      nameCell.textContent = name;
+      row.appendChild(nameCell);
+
+      const addressCell = document.createElement('td');
+      addressCell.textContent = address;
+      row.appendChild(addressCell);
+
+      const signatureCell = document.createElement('td');
+      const signatureImg = document.createElement('img');
+      signatureImg.src = signatureData;
+      signatureCell.appendChild(signatureImg);
+      row.appendChild(signatureCell);
+
+      guestTableBody.appendChild(row);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nameInput = document.getElementById('name');
+      const addressInput = document.getElementById('address');
+      const signatureData = canvas.toDataURL('image/png');
+
+      // Simpan data ke database atau kirim ke server
+      saveGuestData(nameInput.value, addressInput.value, signatureData);
+
+      // Tambahkan tamu ke tabel
+      addGuestToTable(nameInput.value, addressInput.value, signatureData);
+
+      // Reset form dan canvas
+      form.reset();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    function saveGuestData(name, address, signatureData) {
+      // Kode untuk menyimpan data ke database atau mengirim ke server
+      console.log('Nama:', name);
+      console.log('Alamat:', address);
+      console.log('Tanda Tangan:', signatureData);
+    }
+  </script>
+</body>
+</html>
